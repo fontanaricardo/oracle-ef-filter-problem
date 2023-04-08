@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -42,9 +43,20 @@ namespace Application.Generators
             }
             else
             {
-                builder.Append("CASE WHEN ");
-                builder.Append(operation.Filter);
-                builder.Append(" THEN 1 ELSE NULL END");
+                var columns = new string[operation.Columns.Length];
+                for (int index = 0; index < operation.Columns.Length; index++)
+                {
+                    var stringBuilder = new StringBuilder();
+                    stringBuilder.Append("CASE WHEN ");
+                    stringBuilder.Append(operation.Filter);
+                    stringBuilder.Append($" THEN ");
+                    stringBuilder.Append(DelimitIdentifier(operation.Columns[index]));
+                    stringBuilder.Append($" ELSE NULL END");
+
+                    columns[index] = stringBuilder.ToString();
+                }
+
+                builder.Append(string.Join(", ", columns));
             }
 
             builder.Append(")");
