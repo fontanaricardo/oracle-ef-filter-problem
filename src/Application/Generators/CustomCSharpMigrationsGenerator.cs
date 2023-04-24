@@ -37,27 +37,29 @@ namespace Application.Generators
 
             builder.Append(" (");
 
-            if (string.IsNullOrWhiteSpace(operation.Filter))
+            var hasFilter = !string.IsNullOrWhiteSpace(operation.Filter);
+            var columns = new string[operation.Columns.Length];
+            for (int index = 0; index < operation.Columns.Length; index++)
             {
-                builder.Append(DelimitIdentifier(string.Join("\",\"", operation.Columns)));
-            }
-            else
-            {
-                var columns = new string[operation.Columns.Length];
-                for (int index = 0; index < operation.Columns.Length; index++)
+                var columnDelimited = DelimitIdentifier(operation.Columns[index]);
+
+                if (hasFilter)
                 {
                     var stringBuilder = new StringBuilder();
                     stringBuilder.Append("CASE WHEN ");
                     stringBuilder.Append(operation.Filter);
                     stringBuilder.Append($" THEN ");
-                    stringBuilder.Append(DelimitIdentifier(operation.Columns[index]));
+                    stringBuilder.Append(columnDelimited);
                     stringBuilder.Append($" ELSE NULL END");
-
                     columns[index] = stringBuilder.ToString();
+
+                    continue;
                 }
 
-                builder.Append(string.Join(", ", columns));
+                columns[index] = columnDelimited;
             }
+
+            builder.Append(string.Join(", ", columns));
 
             builder.Append(")");
 
